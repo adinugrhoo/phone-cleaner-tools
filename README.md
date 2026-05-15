@@ -19,35 +19,60 @@ Every week a PM drops a new sheet with raw phone numbers. You open the sidebar, 
 |------|---------|
 | `Code.gs` | Server-side: cleaning pipeline, country rules, dedup, read/write to master sheet |
 | `Sidebar.html` | Client-side: sidebar UI with preview → sync flow |
+| `appsscript.json` | Add-on manifest — declares OAuth scopes and runtime |
 
 ---
 
 ## Setup
 
-### 1. Create a Master Sheet
+### 1. Create a standalone Apps Script project
 
-Create a new Google Sheet (separate from any source data). This will hold three tabs: **Master**, **Rejects**, and **Countries**.
+This tool runs as an **Editor Add-on** so it appears in every Google Sheet you open — not just one.
 
-### 2. Deploy the script
+1. Go to [script.google.com](https://script.google.com) → **New project**
+2. Rename the project to `Phone Cleaner`
 
-1. Open any Google Sheet → **Extensions → Apps Script**
-2. Replace the contents of `Code.gs` with the code from this repo
-3. Click **+** to add a new file, name it `Sidebar` (type: HTML), paste `Sidebar.html`
-4. Save (Ctrl+S / Cmd+S) and close the editor
-5. Reload the Google Sheet — a **Phone Cleaner** menu appears in the menu bar
+### 2. Copy the files
 
-### 3. Configure the master sheet
+In the Apps Script editor:
 
-1. Click **Phone Cleaner → Configure Master Sheet**
-2. Paste the URL (or ID) of the master sheet you created in step 1
-3. Click OK — the tool creates all required tabs and seeds the Countries tab with 7 default countries
+1. Replace `Code.gs` contents with the code from this repo
+2. Click **+** (New file) → **HTML** → name it `Sidebar` → paste `Sidebar.html`
+3. Click the gear icon (**Project Settings**) → check **Show "appsscript.json" manifest file in editor**
+4. Open `appsscript.json` in the editor → replace its contents with the `appsscript.json` from this repo
+5. Save all files (Ctrl+S / Cmd+S)
 
-### 4. Run your first batch
+### 3. Deploy as an Editor Add-on
 
-1. Click **Phone Cleaner → Open Sidebar**
-2. Choose a source: paste a sheet URL **or** select a column in the current sheet
+1. Click **Deploy → New deployment**
+2. Click the gear next to "Select type" → choose **Editor Add-on**
+3. Fill in a description (e.g. `v1`), leave access as **Only myself**
+4. Click **Deploy** — authorize the permissions when prompted
+
+### 4. Install the add-on in your account
+
+1. Click **Deploy → Test deployments** (or open the deployment you just created)
+2. Click **Install** next to your deployment
+3. Open any Google Sheet — you will now see **Extensions → Phone Cleaner** in the menu
+
+> The add-on is tied to your Google account. Once installed, it appears automatically in every Google Sheet you open — no need to repeat setup per sheet.
+
+### 5. Create a Master Sheet (one-time)
+
+Create a new Google Sheet to act as the central database. Then:
+
+1. Open any Google Sheet → **Extensions → Phone Cleaner → Configure Master Sheet**
+2. Paste the URL (or Spreadsheet ID) of the master sheet
+3. Click OK — the tool creates **Master**, **Rejects**, and **Countries** tabs with headers and seeds 7 default countries
+
+This setting is saved to your Google account (user properties), so you only need to configure it once.
+
+### 6. Run your first batch
+
+1. Open any Google Sheet → **Extensions → Phone Cleaner → Open Sidebar**
+2. Choose source: paste a sheet URL **or** select the phone column in the current sheet
 3. Pick a default country for ambiguous 0-prefix numbers
-4. Click **Preview** — results appear in the sidebar
+4. Click **Preview** — results appear without writing anything
 5. Review, then click **Sync to master**
 
 ---

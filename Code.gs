@@ -1,13 +1,18 @@
 // ============================================================
-// MENU
+// MENU — add-on entry points
 // ============================================================
-function onOpen() {
+function onOpen(e) {
   SpreadsheetApp.getUi()
-    .createMenu('Phone Cleaner')
+    .createAddonMenu()          // places it under Extensions > Phone Cleaner
     .addItem('Open Sidebar', 'showSidebar')
     .addSeparator()
     .addItem('Configure Master Sheet', 'showConfigDialog')
     .addToUi();
+}
+
+// Called once when the add-on is first installed from the marketplace / manual install
+function onInstall(e) {
+  onOpen(e);
 }
 
 function showSidebar() {
@@ -44,11 +49,11 @@ function showConfigDialog() {
 const MASTER_ID_KEY = 'masterSheetId';
 
 function getMasterSheetId() {
-  return PropertiesService.getScriptProperties().getProperty(MASTER_ID_KEY);
+  return PropertiesService.getUserProperties().getProperty(MASTER_ID_KEY);
 }
 
 function setMasterSheetId(id) {
-  PropertiesService.getScriptProperties().setProperty(MASTER_ID_KEY, id);
+  PropertiesService.getUserProperties().setProperty(MASTER_ID_KEY, id);
 }
 
 // ============================================================
