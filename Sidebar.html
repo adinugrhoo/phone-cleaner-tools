@@ -4,13 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
     theme: {
       extend: {
-        fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        fontFamily: { sans: ['Google Sans Flex', 'system-ui', 'sans-serif'] },
         colors: {
           border:      'hsl(var(--border))',
           input:       'hsl(var(--input))',
@@ -53,7 +54,7 @@
   }
 
   * { box-sizing: border-box; }
-  body { font-family: 'Inter', system-ui, sans-serif; }
+  body { font-family: 'Google Sans Flex', system-ui, sans-serif; }
 
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -92,13 +93,22 @@
   .input-base::placeholder { color: hsl(var(--muted-foreground)); }
 
   select.input-base { cursor: pointer; }
+
+  /* date input — hide the native icon, keep consistent height */
+  input[type="date"].input-base { cursor: pointer; }
+  input[type="date"].input-base::-webkit-calendar-picker-indicator {
+    opacity: 0.5; cursor: pointer;
+  }
+
+  @keyframes spin-icon { to { transform: rotate(360deg); } }
+  .spinning { animation: spin-icon 0.7s linear infinite; }
 </style>
 </head>
 <body class="bg-background text-foreground text-sm p-3 min-h-screen">
 
 <!-- ── Header ── -->
 <div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-border">
-  <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-base shrink-0">📞</div>
+  <img src="https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-BBkPCpGWNn4SgdrJgeeCoHhA88gPGD.png&w=1000&q=75" class="w-8 h-8 rounded-lg object-cover shrink-0" alt="Phone Cleaner" />
   <div>
     <p class="font-semibold text-[13px] leading-none tracking-tight">Phone Cleaner</p>
     <p class="text-[11px] text-muted-foreground mt-0.5">Clean &amp; sync phone numbers</p>
@@ -147,8 +157,17 @@
 
     <!-- Selection info -->
     <div id="sel-input" class="hidden">
-      <div class="rounded-md border border-border bg-muted/50 px-3 py-2 text-[11px] font-mono text-muted-foreground leading-relaxed" id="sel-info">
-        Loading selection…
+      <div class="flex items-center gap-2">
+        <div class="flex-1 rounded-md border border-border bg-muted/50 px-3 py-2 text-[11px] font-mono text-muted-foreground leading-relaxed" id="sel-info">
+          Loading selection…
+        </div>
+        <button onclick="refreshSelection()" title="Refresh selection" id="refresh-btn"
+          class="shrink-0 w-8 h-8 rounded-md border border-border bg-background hover:bg-muted flex items-center justify-center transition-colors">
+          <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground">
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>
+          </svg>
+        </button>
       </div>
     </div>
   </div>
@@ -169,7 +188,7 @@
     <div class="flex gap-2">
       <input type="number" id="batch-num" min="1" value="1"
         class="input-base" style="width:4.5rem" />
-      <input type="text" id="batch-date" placeholder="15 May 2025" class="input-base flex-1" />
+      <input type="date" id="batch-date" class="input-base flex-1" />
     </div>
     <p class="text-[11px] text-muted-foreground" id="batch-label-preview">Label: —</p>
   </div>
@@ -300,7 +319,7 @@
     });
 
     document.getElementById('batch-num').value  = data.nextBatch || 1;
-    document.getElementById('batch-date').value = data.today || '';
+    document.getElementById('batch-date').value = data.todayIso || '';
     updateBatchLabel();
 
     var si = data.selection;
@@ -330,16 +349,47 @@
   document.getElementById('batch-num').addEventListener('input', updateBatchLabel);
   document.getElementById('batch-date').addEventListener('input', updateBatchLabel);
 
+  function formatDateLabel(iso) {
+    if (!iso) return '?';
+    var p = iso.split('-');
+    if (p.length !== 3) return iso;
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return parseInt(p[2], 10) + ' ' + months[parseInt(p[1], 10) - 1] + ' ' + p[0];
+  }
+
   function updateBatchLabel() {
     var n = document.getElementById('batch-num').value;
     var d = document.getElementById('batch-date').value;
     document.getElementById('batch-label-preview').textContent =
-      'Label: Batch ' + (n || '?') + ' · ' + (d || '?');
+      'Label: Batch ' + (n || '?') + ' · ' + formatDateLabel(d);
   }
 
   function getBatchLabel() {
     return 'Batch ' + document.getElementById('batch-num').value +
-           ' · '    + document.getElementById('batch-date').value;
+           ' · ' + formatDateLabel(document.getElementById('batch-date').value);
+  }
+
+  // ── Refresh selection ──
+  function refreshSelection() {
+    var icon = document.getElementById('refresh-icon');
+    icon.classList.add('spinning');
+    document.getElementById('sel-info').textContent = 'Refreshing…';
+    google.script.run
+      .withSuccessHandler(function(si) {
+        icon.classList.remove('spinning');
+        if (si) {
+          _selColIndex = si.colIndex || 1;
+          document.getElementById('sel-info').textContent =
+            si.sheetName + ' · ' + si.a1 + ' (' + si.numRows + ' rows)';
+        } else {
+          document.getElementById('sel-info').textContent = 'No range selected — select a column first.';
+        }
+      })
+      .withFailureHandler(function(e) {
+        icon.classList.remove('spinning');
+        document.getElementById('sel-info').textContent = 'Error: ' + (e.message || e);
+      })
+      .getSelectionInfo();
   }
 
   // ── Preview ──

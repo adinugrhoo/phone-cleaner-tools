@@ -272,18 +272,19 @@ function extractSheetId(urlOrId) {
 // SIDEBAR HELPERS (called from client)
 // ============================================================
 function getInitialData() {
-  const today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd MMM yyyy');
+  const today    = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd MMM yyyy');
+  const todayIso = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
   const id = getMasterSheetId();
 
   if (!id) {
-    return { configured: false, today, nextBatch: 1, countries: [], selection: null };
+    return { configured: false, today, todayIso, nextBatch: 1, countries: [], selection: null };
   }
 
   try {
     const { list } = loadCountryRules();
     const nextBatch = getNextBatchNumber();
     const selection = getSelectionInfo();
-    return { configured: true, today, nextBatch, countries: list, selection };
+    return { configured: true, today, todayIso, nextBatch, countries: list, selection };
   } catch (e) {
     return { configured: false, today, nextBatch: 1, countries: [], error: e.message, selection: null };
   }
