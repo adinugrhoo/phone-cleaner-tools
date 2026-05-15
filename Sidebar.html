@@ -1,349 +1,273 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        colors: {
+          border:      'hsl(var(--border))',
+          input:       'hsl(var(--input))',
+          ring:        'hsl(var(--ring))',
+          background:  'hsl(var(--background))',
+          foreground:  'hsl(var(--foreground))',
+          primary:     { DEFAULT: 'hsl(var(--primary))', foreground: 'hsl(var(--primary-foreground))' },
+          secondary:   { DEFAULT: 'hsl(var(--secondary))', foreground: 'hsl(var(--secondary-foreground))' },
+          muted:       { DEFAULT: 'hsl(var(--muted))', foreground: 'hsl(var(--muted-foreground))' },
+          accent:      { DEFAULT: 'hsl(var(--accent))', foreground: 'hsl(var(--accent-foreground))' },
+          destructive: { DEFAULT: 'hsl(var(--destructive))', foreground: 'hsl(var(--destructive-foreground))' },
+        },
+        borderRadius: {
+          lg: 'var(--radius)',
+          md: 'calc(var(--radius) - 2px)',
+          sm: 'calc(var(--radius) - 4px)',
+        },
+      },
+    },
+  }
+</script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Google Sans', Arial, sans-serif;
-    font-size: 13px;
-    color: #202124;
-    background: #fff;
-    padding: 12px;
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 215 20.2% 65.1%;
+    --radius: 0.5rem;
   }
 
-  h1 {
-    font-size: 15px;
-    font-weight: 600;
-    color: #1a73e8;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+  * { box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; }
 
-  .section { margin-bottom: 14px; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 99px; }
 
-  label {
-    display: block;
-    font-size: 11px;
-    font-weight: 600;
-    color: #5f6368;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    margin-bottom: 5px;
-  }
-
-  input[type="text"], input[type="number"], select {
-    width: 100%;
-    padding: 7px 9px;
-    border: 1px solid #dadce0;
-    border-radius: 4px;
-    font-size: 13px;
-    color: #202124;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  input[type="text"]:focus, input[type="number"]:focus, select:focus {
-    border-color: #1a73e8;
-  }
-
-  .toggle-row {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 8px;
-  }
-  .toggle-btn {
-    flex: 1;
-    padding: 6px;
-    border: 1px solid #dadce0;
-    border-radius: 4px;
-    background: #f8f9fa;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.15s;
-  }
-  .toggle-btn.active {
-    background: #e8f0fe;
-    border-color: #1a73e8;
-    color: #1a73e8;
-  }
-
-  .info-chip {
-    display: inline-block;
-    background: #f1f3f4;
-    border-radius: 3px;
-    padding: 4px 8px;
-    font-size: 12px;
-    color: #5f6368;
-    width: 100%;
-    word-break: break-all;
-  }
-
-  .batch-row {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-  }
-  .batch-row .batch-num {
-    width: 60px;
-    flex-shrink: 0;
-  }
-  .batch-row .batch-date {
-    flex: 1;
-  }
-  .batch-label-preview {
-    margin-top: 5px;
-    font-size: 11px;
-    color: #5f6368;
-  }
-
-  .btn {
-    display: block;
-    width: 100%;
-    padding: 9px;
-    border: none;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .btn-primary {
-    background: #1a73e8;
-    color: #fff;
-  }
-  .btn-primary:hover { background: #1557b0; }
-  .btn-primary:disabled { background: #dadce0; color: #9aa0a6; cursor: not-allowed; }
-  .btn-success {
-    background: #34a853;
-    color: #fff;
-    margin-top: 10px;
-  }
-  .btn-success:hover { background: #1e7e34; }
-
-  .divider { border: none; border-top: 1px solid #e8eaed; margin: 14px 0; }
-
-  .summary-row {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-  }
-  .badge {
-    flex: 1;
-    min-width: 70px;
-    text-align: center;
-    padding: 8px 4px;
-    border-radius: 6px;
-    font-size: 12px;
-  }
-  .badge .num { font-size: 20px; font-weight: 700; display: block; }
-  .badge-new  { background: #e6f4ea; color: #137333; }
-  .badge-dup  { background: #e8f0fe; color: #1a73e8; }
-  .badge-rej  { background: #fce8e6; color: #c5221f; }
-
-  .results-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    margin-bottom: 8px;
-  }
-  .results-table th {
-    text-align: left;
-    font-weight: 600;
-    color: #5f6368;
-    padding: 3px 4px;
-    border-bottom: 1px solid #e8eaed;
-  }
-  .results-table td {
-    padding: 3px 4px;
-    border-bottom: 1px solid #f1f3f4;
-    font-family: monospace;
-    font-size: 11px;
-  }
-  .status-new { color: #137333; font-weight: 600; }
-  .status-dup { color: #1a73e8; }
-
-  .reject-list {
-    font-size: 12px;
-    color: #c5221f;
-  }
-  .reject-item {
-    padding: 2px 0;
-    border-bottom: 1px solid #fce8e6;
-  }
-  .reject-reason {
-    font-size: 10px;
-    color: #9aa0a6;
-    float: right;
-    font-style: italic;
-  }
-
-  .warning-box {
-    background: #fef7e0;
-    border: 1px solid #f9ab00;
-    border-radius: 4px;
-    padding: 8px;
-    font-size: 12px;
-    color: #7a4100;
-    margin-bottom: 10px;
-  }
-
-  .error-box {
-    background: #fce8e6;
-    border: 1px solid #f44336;
-    border-radius: 4px;
-    padding: 8px;
-    font-size: 12px;
-    color: #b31412;
-    margin-bottom: 10px;
-  }
-
-  .config-box {
-    background: #e8f0fe;
-    border: 1px solid #1a73e8;
-    border-radius: 4px;
-    padding: 10px;
-    font-size: 12px;
-    color: #174ea6;
-    margin-bottom: 14px;
-    line-height: 1.5;
-  }
-
+  @keyframes spin { to { transform: rotate(360deg); } }
   .spinner {
     display: inline-block;
-    width: 14px;
-    height: 14px;
-    border: 2px solid #fff;
+    width: 13px; height: 13px;
+    border: 2px solid currentColor;
     border-top-color: transparent;
     border-radius: 50%;
-    animation: spin 0.7s linear infinite;
+    animation: spin 0.65s linear infinite;
     vertical-align: middle;
-    margin-right: 6px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .success-box {
-    background: #e6f4ea;
-    border: 1px solid #34a853;
-    border-radius: 4px;
-    padding: 10px;
-    font-size: 13px;
-    color: #137333;
-    font-weight: 500;
+    margin-right: 5px;
+    opacity: 0.75;
   }
 
-  #results-section { display: none; }
-  #sync-section { display: none; }
-  #done-section { display: none; }
+  /* shadcn-style ring focus */
+  .input-base {
+    width: 100%;
+    height: 2rem;
+    padding: 0 0.75rem;
+    border-radius: var(--radius);
+    border: 1px solid hsl(var(--input));
+    background: hsl(var(--background));
+    font-size: 0.75rem;
+    color: hsl(var(--foreground));
+    outline: none;
+    transition: box-shadow 0.15s, border-color 0.15s;
+  }
+  .input-base:focus {
+    border-color: hsl(var(--ring));
+    box-shadow: 0 0 0 2px hsl(var(--ring) / 0.25);
+  }
+  .input-base::placeholder { color: hsl(var(--muted-foreground)); }
+
+  select.input-base { cursor: pointer; }
 </style>
 </head>
-<body>
+<body class="bg-background text-foreground text-sm p-3 min-h-screen">
 
-<h1>&#128222; Phone Cleaner</h1>
-
-<!-- Not configured state -->
-<div id="not-configured" style="display:none">
-  <div class="config-box">
-    <strong>Master sheet not configured.</strong><br>
-    Go to <em>Phone Cleaner → Configure Master Sheet</em> in the menu, then re-open this sidebar.
+<!-- ── Header ── -->
+<div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-border">
+  <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-base shrink-0">📞</div>
+  <div>
+    <p class="font-semibold text-[13px] leading-none tracking-tight">Phone Cleaner</p>
+    <p class="text-[11px] text-muted-foreground mt-0.5">Clean &amp; sync phone numbers</p>
   </div>
 </div>
 
-<!-- Main form -->
-<div id="main-form">
+<!-- ── Not configured ── -->
+<div id="not-configured" class="hidden">
+  <div class="rounded-lg border border-blue-200 bg-blue-50 p-3 space-y-1">
+    <p class="text-xs font-semibold text-blue-900">Master sheet not configured</p>
+    <p class="text-xs text-blue-800 leading-relaxed">
+      Go to <span class="font-medium">Phone Cleaner → Configure Master Sheet</span> in the menu bar, then re-open this sidebar.
+    </p>
+  </div>
+</div>
+
+<!-- ── Main form ── -->
+<div id="main-form" class="space-y-4">
 
   <!-- Source -->
-  <div class="section">
-    <label>Source</label>
-    <div class="toggle-row">
-      <div class="toggle-btn active" id="btn-url" onclick="setMode('url')">Paste URL</div>
-      <div class="toggle-btn" id="btn-sel" onclick="setMode('sel')">Selected Range</div>
+  <div class="space-y-2">
+    <p class="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Source</p>
+
+    <!-- Tab toggle -->
+    <div class="flex rounded-md border border-border bg-muted p-0.5 gap-0.5">
+      <button id="btn-url" onclick="setMode('url')"
+        class="flex-1 rounded py-1.5 text-[11px] font-medium transition-all bg-background shadow-sm text-foreground">
+        Paste URL
+      </button>
+      <button id="btn-sel" onclick="setMode('sel')"
+        class="flex-1 rounded py-1.5 text-[11px] font-medium transition-all text-muted-foreground">
+        Selected Range
+      </button>
     </div>
 
-    <div id="url-input">
-      <input type="text" id="sheet-url" placeholder="Sheet URL or Spreadsheet ID" />
-      <div style="margin-top:6px">
-        <label style="margin-bottom:3px">Column index (1 = A)</label>
-        <input type="number" id="col-index" value="1" min="1" style="width:80px" />
+    <!-- URL inputs -->
+    <div id="url-input" class="space-y-2">
+      <input type="text" id="sheet-url" placeholder="Sheet URL or Spreadsheet ID" class="input-base" />
+      <div class="flex items-center gap-2">
+        <span class="text-[11px] text-muted-foreground shrink-0">Column</span>
+        <input type="number" id="col-index" value="1" min="1"
+          class="input-base" style="width:4rem" />
+        <span class="text-[11px] text-muted-foreground">(1 = col A)</span>
       </div>
     </div>
 
-    <div id="sel-input" style="display:none">
-      <div class="info-chip" id="sel-info">Loading selection info...</div>
+    <!-- Selection info -->
+    <div id="sel-input" class="hidden">
+      <div class="rounded-md border border-border bg-muted/50 px-3 py-2 text-[11px] font-mono text-muted-foreground leading-relaxed" id="sel-info">
+        Loading selection…
+      </div>
     </div>
   </div>
 
   <!-- Default country -->
-  <div class="section">
-    <label>Default country <span style="font-weight:400;text-transform:none">(for 0-prefix numbers)</span></label>
-    <select id="country-select">
-      <option value="">Loading countries...</option>
+  <div class="space-y-2">
+    <p class="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+      Default Country <span class="normal-case font-normal">(for 0-prefix)</span>
+    </p>
+    <select id="country-select" class="input-base">
+      <option value="">Loading countries…</option>
     </select>
   </div>
 
   <!-- Batch -->
-  <div class="section">
-    <label>Batch</label>
-    <div class="batch-row">
-      <div class="batch-num">
-        <input type="number" id="batch-num" min="1" value="1" />
-      </div>
-      <div class="batch-date">
-        <input type="text" id="batch-date" placeholder="15 May 2025" />
-      </div>
+  <div class="space-y-2">
+    <p class="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Batch</p>
+    <div class="flex gap-2">
+      <input type="number" id="batch-num" min="1" value="1"
+        class="input-base" style="width:4.5rem" />
+      <input type="text" id="batch-date" placeholder="15 May 2025" class="input-base flex-1" />
     </div>
-    <div class="batch-label-preview" id="batch-label-preview">Label: —</div>
+    <p class="text-[11px] text-muted-foreground" id="batch-label-preview">Label: —</p>
   </div>
 
-  <div id="form-error" class="error-box" style="display:none"></div>
+  <!-- Error -->
+  <div id="form-error" class="hidden rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-[11px] text-destructive leading-relaxed"></div>
 
-  <button class="btn btn-primary" id="preview-btn" onclick="runPreview()" disabled>Preview</button>
+  <!-- Preview button -->
+  <button id="preview-btn" onclick="runPreview()" disabled
+    class="w-full h-9 rounded-md bg-primary text-primary-foreground text-[13px] font-medium
+           transition-colors hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed
+           flex items-center justify-center gap-1.5">
+    Preview
+  </button>
+
 </div>
 
-<hr class="divider">
+<!-- ── Divider ── -->
+<div class="border-t border-border my-4"></div>
 
-<!-- Results -->
-<div id="results-section">
-  <div id="warning-box" class="warning-box" style="display:none"></div>
+<!-- ── Results ── -->
+<div id="results-section" class="hidden space-y-3">
 
-  <div class="summary-row">
-    <div class="badge badge-new">
-      <span class="num" id="count-new">0</span>
-      valid new
+  <!-- Warning -->
+  <div id="warning-box" class="hidden rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800 leading-relaxed"></div>
+
+  <!-- Stats cards -->
+  <div class="grid grid-cols-3 gap-2">
+    <div class="rounded-lg border border-emerald-100 bg-emerald-50 p-2.5 text-center">
+      <p class="text-xl font-bold text-emerald-700 leading-none" id="count-new">0</p>
+      <p class="text-[10px] text-emerald-600 mt-1 font-medium">new</p>
     </div>
-    <div class="badge badge-dup">
-      <span class="num" id="count-dup">0</span>
-      duplicate
+    <div class="rounded-lg border border-blue-100 bg-blue-50 p-2.5 text-center">
+      <p class="text-xl font-bold text-blue-700 leading-none" id="count-dup">0</p>
+      <p class="text-[10px] text-blue-600 mt-1 font-medium">duplicate</p>
     </div>
-    <div class="badge badge-rej">
-      <span class="num" id="count-rej">0</span>
-      rejected
+    <div class="rounded-lg border border-red-100 bg-red-50 p-2.5 text-center">
+      <p class="text-xl font-bold text-red-700 leading-none" id="count-rej">0</p>
+      <p class="text-[10px] text-red-600 mt-1 font-medium">rejected</p>
     </div>
   </div>
 
   <!-- Valid numbers table -->
-  <div id="valid-container" style="max-height:160px;overflow-y:auto;margin-bottom:8px"></div>
+  <div id="valid-container" class="hidden rounded-md border border-border overflow-hidden">
+    <div class="max-h-44 overflow-y-auto">
+      <table class="w-full text-[11px]">
+        <thead class="sticky top-0 bg-muted border-b border-border">
+          <tr>
+            <th class="text-left px-3 py-2 text-muted-foreground font-medium">Number</th>
+            <th class="text-left px-2 py-2 text-muted-foreground font-medium w-10">CC</th>
+            <th class="text-left px-2 py-2 text-muted-foreground font-medium w-16">Status</th>
+          </tr>
+        </thead>
+        <tbody id="valid-tbody" class="divide-y divide-border"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- No valid numbers -->
+  <div id="no-valid" class="hidden rounded-md border border-border bg-muted/30 px-3 py-4 text-center text-[11px] text-muted-foreground">
+    No valid numbers found.
+  </div>
 
   <!-- Rejects -->
-  <div id="rejects-container" style="max-height:100px;overflow-y:auto"></div>
+  <div id="rejects-container" class="hidden rounded-md border border-red-100 overflow-hidden">
+    <div class="bg-red-50 px-3 py-2 border-b border-red-100 flex items-center gap-1.5">
+      <span class="text-red-500 text-xs">✕</span>
+      <p class="text-[11px] font-semibold text-red-700">Rejected</p>
+    </div>
+    <div class="max-h-28 overflow-y-auto divide-y divide-red-50 bg-white" id="rejects-list"></div>
+  </div>
 
 </div>
 
-<!-- Sync -->
-<div id="sync-section">
-  <div id="sync-error" class="error-box" style="display:none"></div>
-  <button class="btn btn-success" onclick="runSync()">Sync to master</button>
+<!-- ── Sync ── -->
+<div id="sync-section" class="hidden mt-3 space-y-2">
+  <div id="sync-error" class="hidden rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-[11px] text-destructive"></div>
+  <button id="sync-btn" onclick="runSync()"
+    class="w-full h-9 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-medium
+           transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
+    Sync to master
+  </button>
 </div>
 
-<!-- Done -->
-<div id="done-section">
-  <div class="success-box" id="done-msg"></div>
-  <button class="btn btn-primary" style="margin-top:10px" onclick="resetForm()">Run another batch</button>
+<!-- ── Done ── -->
+<div id="done-section" class="hidden space-y-2">
+  <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 space-y-1.5">
+    <div class="flex items-center gap-2">
+      <span class="text-emerald-600 text-base">✓</span>
+      <p class="text-[13px] font-semibold text-emerald-900">Sync complete</p>
+    </div>
+    <p id="done-msg" class="text-[11px] text-emerald-800 leading-relaxed pl-6"></p>
+  </div>
+  <button onclick="resetForm()"
+    class="w-full h-9 rounded-md border border-border bg-background hover:bg-muted text-[13px] font-medium
+           transition-colors flex items-center justify-center">
+    Run another batch
+  </button>
 </div>
 
 <script>
@@ -352,7 +276,7 @@
   var _sourceId = null;
   var _selColIndex = 1;
 
-  // ---- Init ----
+  // ── Init ──
   google.script.run
     .withSuccessHandler(onInitData)
     .withFailureHandler(showFormError)
@@ -360,94 +284,84 @@
 
   function onInitData(data) {
     if (!data.configured) {
-      document.getElementById('not-configured').style.display = 'block';
-      document.getElementById('main-form').style.display = 'none';
+      show('not-configured');
+      hide('main-form');
       if (data.error) showFormError(data.error);
       return;
     }
 
-    // Countries dropdown
     var sel = document.getElementById('country-select');
     sel.innerHTML = '';
     (data.countries || []).forEach(function(c) {
-      var opt = document.createElement('option');
-      opt.value = c.code;
-      opt.textContent = c.name + ' (' + c.code + ')';
-      sel.appendChild(opt);
+      var o = document.createElement('option');
+      o.value = c.code;
+      o.textContent = c.name + ' (' + c.code + ')';
+      sel.appendChild(o);
     });
 
-    // Batch
-    document.getElementById('batch-num').value = data.nextBatch || 1;
+    document.getElementById('batch-num').value  = data.nextBatch || 1;
     document.getElementById('batch-date').value = data.today || '';
     updateBatchLabel();
 
-    // Selection info
     var si = data.selection;
     if (si) {
       _selColIndex = si.colIndex || 1;
       document.getElementById('sel-info').textContent =
         si.sheetName + ' · ' + si.a1 + ' (' + si.numRows + ' rows)';
     } else {
-      document.getElementById('sel-info').textContent = 'No range selected. Select a column first.';
+      document.getElementById('sel-info').textContent = 'No range selected — select a column first.';
     }
 
     document.getElementById('preview-btn').disabled = false;
   }
 
-  // ---- Mode toggle ----
+  // ── Mode toggle ──
   function setMode(m) {
     _mode = m;
-    document.getElementById('btn-url').classList.toggle('active', m === 'url');
-    document.getElementById('btn-sel').classList.toggle('active', m === 'sel');
-    document.getElementById('url-input').style.display  = m === 'url' ? '' : 'none';
-    document.getElementById('sel-input').style.display  = m === 'sel' ? '' : 'none';
+    var active   = 'flex-1 rounded py-1.5 text-[11px] font-medium transition-all bg-background shadow-sm text-foreground';
+    var inactive = 'flex-1 rounded py-1.5 text-[11px] font-medium transition-all text-muted-foreground';
+    document.getElementById('btn-url').className = m === 'url' ? active : inactive;
+    document.getElementById('btn-sel').className = m === 'sel' ? active : inactive;
+    toggle('url-input', m === 'url');
+    toggle('sel-input', m === 'sel');
   }
 
-  // ---- Batch label ----
+  // ── Batch label ──
   document.getElementById('batch-num').addEventListener('input', updateBatchLabel);
   document.getElementById('batch-date').addEventListener('input', updateBatchLabel);
 
   function updateBatchLabel() {
-    var num  = document.getElementById('batch-num').value;
-    var date = document.getElementById('batch-date').value;
-    var label = 'Batch ' + (num || '?') + ' · ' + (date || '?');
-    document.getElementById('batch-label-preview').textContent = 'Label: ' + label;
+    var n = document.getElementById('batch-num').value;
+    var d = document.getElementById('batch-date').value;
+    document.getElementById('batch-label-preview').textContent =
+      'Label: Batch ' + (n || '?') + ' · ' + (d || '?');
   }
 
   function getBatchLabel() {
-    var num  = document.getElementById('batch-num').value;
-    var date = document.getElementById('batch-date').value;
-    return 'Batch ' + num + ' · ' + date;
+    return 'Batch ' + document.getElementById('batch-num').value +
+           ' · '    + document.getElementById('batch-date').value;
   }
 
-  // ---- Preview ----
+  // ── Preview ──
   function runPreview() {
     clearFormError();
     var btn = document.getElementById('preview-btn');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Running preview…';
-
-    document.getElementById('results-section').style.display = 'none';
-    document.getElementById('sync-section').style.display = 'none';
-    document.getElementById('done-section').style.display = 'none';
-
-    var params = {
-      mode:           _mode,
-      urlOrId:        document.getElementById('sheet-url').value.trim(),
-      colIndex:       _mode === 'url'
-                        ? parseInt(document.getElementById('col-index').value, 10) || 1
-                        : _selColIndex,
-      defaultCountry: document.getElementById('country-select').value,
-      batchLabel:     getBatchLabel()
-    };
+    hide('results-section'); hide('sync-section'); hide('done-section');
 
     google.script.run
       .withSuccessHandler(onPreviewDone)
-      .withFailureHandler(function(e) {
-        showFormError(e.message || String(e));
-        resetPreviewBtn();
-      })
-      .runPreview(params);
+      .withFailureHandler(function(e) { showFormError(e.message || String(e)); resetPreviewBtn(); })
+      .runPreview({
+        mode:           _mode,
+        urlOrId:        document.getElementById('sheet-url').value.trim(),
+        colIndex:       _mode === 'url'
+                          ? parseInt(document.getElementById('col-index').value, 10) || 1
+                          : _selColIndex,
+        defaultCountry: document.getElementById('country-select').value,
+        batchLabel:     getBatchLabel()
+      });
   }
 
   function onPreviewDone(data) {
@@ -458,96 +372,87 @@
     document.getElementById('count-dup').textContent = data.dupCount;
     document.getElementById('count-rej').textContent = data.rejectedCount;
 
-    var warn = document.getElementById('warning-box');
-    if (data.warning) {
-      warn.textContent = '⚠️ ' + data.warning;
-      warn.style.display = '';
-    } else {
-      warn.style.display = 'none';
-    }
+    // Warning
+    var wb = document.getElementById('warning-box');
+    if (data.warning) { wb.textContent = '⚠ ' + data.warning; show('warning-box'); }
+    else hide('warning-box');
 
     // Valid table
-    var vc = document.getElementById('valid-container');
+    var tbody = document.getElementById('valid-tbody');
+    tbody.innerHTML = '';
     if (data.valid && data.valid.length > 0) {
-      var html = '<table class="results-table"><thead><tr>' +
-        '<th>Number</th><th>CC</th><th>Status</th></tr></thead><tbody>';
       data.valid.forEach(function(v) {
-        html += '<tr><td>' + v.number + '</td><td>' + v.country + '</td>' +
-          '<td class="status-' + v.status + '">' + v.status + '</td></tr>';
+        var tr = document.createElement('tr');
+        tr.className = 'hover:bg-muted/40 transition-colors';
+        var sc = v.status === 'new'
+          ? 'inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-100 text-emerald-700'
+          : 'inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700';
+        tr.innerHTML =
+          '<td class="px-3 py-1.5 font-mono text-[11px] text-foreground">' + escHtml(v.number) + '</td>' +
+          '<td class="px-2 py-1.5 text-muted-foreground">' + v.country + '</td>' +
+          '<td class="px-2 py-1.5"><span class="' + sc + '">' + v.status + '</span></td>';
+        tbody.appendChild(tr);
       });
-      html += '</tbody></table>';
-      vc.innerHTML = html;
+      show('valid-container'); hide('no-valid');
     } else {
-      vc.innerHTML = '<div style="color:#9aa0a6;font-size:12px;padding:4px 0">No valid numbers found.</div>';
+      hide('valid-container'); show('no-valid');
     }
 
     // Rejects
-    var rc = document.getElementById('rejects-container');
+    var rl = document.getElementById('rejects-list');
+    rl.innerHTML = '';
     if (data.rejected && data.rejected.length > 0) {
-      var rhtml = '<div style="font-size:11px;font-weight:600;color:#5f6368;margin-bottom:4px">Rejected:</div>' +
-        '<div class="reject-list">';
       data.rejected.forEach(function(r) {
-        rhtml += '<div class="reject-item">' + escHtml(r.raw) +
-          '<span class="reject-reason">' + r.reason + '</span></div>';
+        var d = document.createElement('div');
+        d.className = 'flex items-center justify-between px-3 py-1.5 gap-2';
+        d.innerHTML =
+          '<span class="font-mono text-[11px] text-red-700 truncate">' + escHtml(r.raw) + '</span>' +
+          '<span class="text-[10px] text-muted-foreground italic shrink-0 bg-red-50 px-1.5 py-0.5 rounded">' + r.reason + '</span>';
+        rl.appendChild(d);
       });
-      rhtml += '</div>';
-      rc.innerHTML = rhtml;
+      show('rejects-container');
     } else {
-      rc.innerHTML = '';
+      hide('rejects-container');
     }
 
-    document.getElementById('results-section').style.display = '';
-    document.getElementById('sync-section').style.display = data.newCount + data.dupCount > 0 ? '' : 'none';
-    document.getElementById('sync-error').style.display = 'none';
-
+    show('results-section');
+    if (data.newCount + data.dupCount > 0) show('sync-section');
+    hide('sync-error');
     resetPreviewBtn();
   }
 
-  // ---- Sync ----
+  // ── Sync ──
   function runSync() {
-    var syncBtn = document.querySelector('#sync-section .btn-success');
-    syncBtn.disabled = true;
-    syncBtn.innerHTML = '<span class="spinner"></span>Syncing…';
-    document.getElementById('sync-error').style.display = 'none';
-
-    var params = {
-      previewData: _previewData,
-      batchLabel:  getBatchLabel(),
-      sourceId:    _sourceId
-    };
+    var btn = document.getElementById('sync-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Syncing…';
+    hide('sync-error');
 
     google.script.run
       .withSuccessHandler(onSyncDone)
       .withFailureHandler(function(e) {
-        document.getElementById('sync-error').textContent = e.message || String(e);
-        document.getElementById('sync-error').style.display = '';
-        syncBtn.disabled = false;
-        syncBtn.textContent = 'Sync to master';
+        var el = document.getElementById('sync-error');
+        el.textContent = e.message || String(e);
+        show('sync-error');
+        btn.disabled = false;
+        btn.textContent = 'Sync to master';
       })
-      .syncToMaster(params);
+      .syncToMaster({ previewData: _previewData, batchLabel: getBatchLabel(), sourceId: _sourceId });
   }
 
-  function onSyncDone(result) {
-    document.getElementById('results-section').style.display = 'none';
-    document.getElementById('sync-section').style.display = 'none';
-    document.getElementById('done-section').style.display = '';
-    document.getElementById('done-msg').innerHTML =
-      '✅ Sync complete!<br>' +
-      result.newAdded + ' new numbers added &nbsp;·&nbsp; ' +
-      result.dupsUpdated + ' last_seen updated &nbsp;·&nbsp; ' +
-      result.rejectsLogged + ' rejects logged';
+  function onSyncDone(r) {
+    hide('results-section'); hide('sync-section'); show('done-section');
+    document.getElementById('done-msg').textContent =
+      r.newAdded + ' numbers added · ' +
+      r.dupsUpdated + ' last_seen updated · ' +
+      r.rejectsLogged + ' rejects logged';
   }
 
-  // ---- Reset ----
+  // ── Reset ──
   function resetForm() {
-    _previewData = null;
-    _sourceId    = null;
-    document.getElementById('results-section').style.display = 'none';
-    document.getElementById('sync-section').style.display = 'none';
-    document.getElementById('done-section').style.display = 'none';
+    _previewData = null; _sourceId = null;
+    hide('results-section'); hide('sync-section'); hide('done-section');
     clearFormError();
-
-    // Re-fetch initial data to get updated batch number
     document.getElementById('preview-btn').disabled = true;
     document.getElementById('country-select').innerHTML = '<option>Loading…</option>';
     google.script.run
@@ -556,16 +461,17 @@
       .getInitialData();
   }
 
-  // ---- Helpers ----
-  function showFormError(msg) {
-    var box = document.getElementById('form-error');
-    box.textContent = msg.message || String(msg);
-    box.style.display = '';
-  }
+  // ── Helpers ──
+  function show(id) { document.getElementById(id).classList.remove('hidden'); }
+  function hide(id) { document.getElementById(id).classList.add('hidden'); }
+  function toggle(id, visible) { visible ? show(id) : hide(id); }
 
-  function clearFormError() {
-    document.getElementById('form-error').style.display = 'none';
+  function showFormError(msg) {
+    var el = document.getElementById('form-error');
+    el.textContent = msg.message || String(msg);
+    show('form-error');
   }
+  function clearFormError() { hide('form-error'); }
 
   function resetPreviewBtn() {
     var btn = document.getElementById('preview-btn');
@@ -574,10 +480,7 @@
   }
 
   function escHtml(s) {
-    return String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 </script>
 </body>
