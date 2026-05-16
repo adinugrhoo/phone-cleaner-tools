@@ -1,13 +1,15 @@
 # Phone Cleaner — Google Apps Script
 
-A Google Sheets sidebar tool that cleans, validates, and deduplicates phone numbers into a central master sheet. Built with pure Google Apps Script — no external libraries or npm required.
+A Google Sheets sidebar tool that cleans, validates, and deduplicates phone numbers into a central master sheet. Runs as an **Editor Add-on** — available in every Google Sheet you open. Built with pure Google Apps Script and vanilla JS — no external libraries or npm required.
+
+---
 
 ## What it does
 
 Every week a PM drops a new sheet with raw phone numbers. You open the sidebar, fill in the details, and the tool:
 
 1. **Cleans** — splits comma-separated cells, strips non-digit characters
-2. **Validates** — applies country-specific rules (loaded from a Countries tab, no code changes needed)
+2. **Validates** — applies country-specific rules loaded live from a Countries tab (no code changes needed)
 3. **Deduplicates** — checks against the master sheet; new numbers are appended, duplicates get `last_seen` updated, opted-out numbers are skipped
 4. **Previews first** — nothing is written until you explicitly click Sync
 
@@ -18,8 +20,21 @@ Every week a PM drops a new sheet with raw phone numbers. You open the sidebar, 
 | File | Purpose |
 |------|---------|
 | `Code.gs` | Server-side: cleaning pipeline, country rules, dedup, read/write to master sheet |
-| `Sidebar.html` | Client-side: sidebar UI with preview → sync flow |
+| `Sidebar.html` | Client-side: sidebar UI (Tailwind CSS + shadcn design tokens + Google Sans Flex font) |
 | `appsscript.json` | Add-on manifest — declares OAuth scopes and runtime |
+
+---
+
+## UI
+
+The sidebar is built with **Tailwind CSS CDN** and **shadcn design tokens** for a clean, modern look — no build step needed.
+
+- **Google Sans Flex** font (loaded from Google Fonts)
+- Source toggle: Paste URL mode or Selected Range mode
+- Icon-only **refresh button** (↺) on the Selected Range input — re-fetches the active selection without reopening the sidebar
+- **Native date picker** for the batch date field — stored as `DD MMM YYYY` in the batch label
+- Stats cards (new / duplicate / rejected) with color-coded results table and reject list
+- Preview → Sync flow: nothing writes to master until you confirm
 
 ---
 
@@ -39,47 +54,46 @@ In the Apps Script editor:
 1. Replace `Code.gs` contents with the code from this repo
 2. Click **+** (New file) → **HTML** → name it `Sidebar` → paste `Sidebar.html`
 3. Click the gear icon (**Project Settings**) → check **Show "appsscript.json" manifest file in editor**
-4. Open `appsscript.json` in the editor → replace its contents with the `appsscript.json` from this repo
+4. Open `appsscript.json` → replace its contents with the `appsscript.json` from this repo
 5. Save all files (Ctrl+S / Cmd+S)
 
-### 3. Deploy as an Editor Add-on
+### 3. Install as an Editor Add-on
 
-1. Click **Deploy → New deployment**
-2. Click the gear next to "Select type" → choose **Editor Add-on**
-3. Fill in a description (e.g. `v1`), leave access as **Only myself**
-4. Click **Deploy** — authorize the permissions when prompted
+1. Click **Deploy → Test deployments**
+2. Select type → **Editor Add-on**
+3. Click **Install** → authorize the permissions when prompted
+4. Open any Google Sheet — you will now see **Extensions → Phone Cleaner** in the menu
 
-### 4. Install the add-on in your account
+> The add-on is tied to your Google account. Once installed, it appears automatically in every Google Sheet you open — no repeat setup needed per sheet.
+>
+> **Note:** "Deploy → New deployment → Add-on" is for publishing to the Workspace Marketplace and requires a GCP project. For personal use, always use **Test deployments → Install** instead.
 
-1. Click **Deploy → Test deployments** (or open the deployment you just created)
-2. Click **Install** next to your deployment
-3. Open any Google Sheet — you will now see **Extensions → Phone Cleaner** in the menu
-
-> The add-on is tied to your Google account. Once installed, it appears automatically in every Google Sheet you open — no need to repeat setup per sheet.
-
-### 5. Create a Master Sheet (one-time)
+### 4. Create a Master Sheet (one-time)
 
 Create a new Google Sheet to act as the central database. Then:
 
 1. Open any Google Sheet → **Extensions → Phone Cleaner → Configure Master Sheet**
 2. Paste the URL (or Spreadsheet ID) of the master sheet
-3. Click OK — the tool creates **Master**, **Rejects**, and **Countries** tabs with headers and seeds 7 default countries
+3. Click OK — the tool automatically creates **Master**, **Rejects**, and **Countries** tabs with headers, and seeds 7 default countries
 
-This setting is saved to your Google account (user properties), so you only need to configure it once.
+This setting is saved to your Google account (user properties), so you only need to configure it once across all sheets.
 
-### 6. Run your first batch
+### 5. Run your first batch
 
 1. Open any Google Sheet → **Extensions → Phone Cleaner → Open Sidebar**
-2. Choose source: paste a sheet URL **or** select the phone column in the current sheet
+2. Choose source:
+   - **Paste URL** — paste a Google Sheet URL or Spreadsheet ID and specify the column number
+   - **Selected Range** — select the phone number column in the current sheet first, then click the ↺ refresh button to detect it
 3. Pick a default country for ambiguous 0-prefix numbers
-4. Click **Preview** — results appear without writing anything
-5. Review, then click **Sync to master**
+4. Set the batch number (auto-incremented) and date (auto-filled, both editable)
+5. Click **Preview** — results appear without writing anything
+6. Review new / duplicate / rejected counts, then click **Sync to master**
 
 ---
 
 ## Cleaning pipeline
 
-Each cell goes through these steps:
+Each cell goes through these steps in order:
 
 ```
 Step 1 — Split by comma
@@ -103,17 +117,17 @@ Step 4 — Deduplicate
 
 ## Country rules
 
-Rules live in the **Countries tab** of the master sheet. Edit the sheet to add or change countries — no redeployment needed.
+Rules live in the **Countries tab** of the master sheet. Edit the sheet to add or update a country — no redeployment needed. The tool reads this tab fresh on every run.
 
-| Col | Field | Example |
-|-----|-------|---------|
-| A | code | ID |
-| B | name | Indonesia |
-| C | prefix | +62 |
-| D | valid_lengths | 9,10,11,12 |
-| E | strip_leading_zero | TRUE |
+| Col | Field | Example | Notes |
+|-----|-------|---------|-------|
+| A | code | ID | ISO 2-letter country code |
+| B | name | Indonesia | Shown in sidebar dropdown |
+| C | prefix | +62 | E.164 prefix to prepend |
+| D | valid_lengths | 9,10,11,12 | Digit lengths after stripping leading 0 |
+| E | strip_leading_zero | TRUE | Whether to remove a leading 0 before applying prefix |
 
-**Default countries (seeded automatically):**
+**Default countries (seeded automatically on first configure):**
 
 | Code | Country | Prefix | Valid lengths | Strip leading 0 |
 |------|---------|--------|---------------|-----------------|
@@ -125,7 +139,7 @@ Rules live in the **Countries tab** of the master sheet. Edit the sheet to add o
 | VN | Vietnam | +84 | 9,10 | TRUE |
 | AU | Australia | +61 | 9,10 | TRUE |
 
-To add a new country, open the master sheet, go to the Countries tab, and add a row. The tool reads this tab fresh on every run.
+To add a new country: open the master sheet → Countries tab → add a row. Done.
 
 ---
 
@@ -133,17 +147,17 @@ To add a new country, open the master sheet, go to the Countries tab, and add a 
 
 ### Master tab
 
-| Col | Field | Example |
-|-----|-------|---------|
-| A | number | +6281234567890 |
-| B | country | ID |
-| C | region | Indonesia |
-| D | batch | Batch 21 · 15 May 2025 |
-| E | source_sheet_id | 1BxiMVs0XRA5... |
-| F | first_seen | 2025-05-15 |
-| G | last_seen | 2025-05-15 |
-| H | outreach_status | not_sent |
-| I | opt_out | FALSE |
+| Col | Field | Example | Notes |
+|-----|-------|---------|-------|
+| A | number | +6281234567890 | E.164, primary key for deduplication |
+| B | country | ID | ISO code |
+| C | region | Indonesia | Country name |
+| D | batch | Batch 21 · 15 May 2025 | Set in sidebar per run |
+| E | source_sheet_id | 1BxiMVs0XRA5... | Spreadsheet ID of the source file |
+| F | first_seen | 2025-05-15 | Set on first ingestion, never overwritten |
+| G | last_seen | 2025-05-15 | Updated every time number appears again |
+| H | outreach_status | not_sent | not_sent / sent / opted_out |
+| I | opt_out | FALSE | TRUE locks row from all outreach permanently |
 
 ### Rejects tab
 
@@ -155,16 +169,22 @@ To add a new country, open the master sheet, go to the Countries tab, and add a 
 | D | batch | Batch 21 · 15 May 2025 |
 | E | rejected_at | 2025-05-15 |
 
+Rejects are shared back with the PM so source data quality improves over time.
+
+### Countries tab
+
+See country rules section above.
+
 ---
 
 ## Performance notes
 
-GAS has a 6-minute execution limit. The tool mitigates this by:
+GAS has a 6-minute execution limit per run. The tool mitigates this by:
 
 - Loading the master index into a JS hash map once — O(1) per-number lookup
-- Loading country rules once per run
-- Writing all new rows in a single `setValues()` call
-- Showing a warning in the sidebar if a batch exceeds 5,000 numbers
+- Loading country rules once per run into memory
+- Writing all new rows in a single `setValues()` call instead of `appendRow()` per row
+- Previewing warns if a batch exceeds 5,000 numbers
 
 ---
 
@@ -172,4 +192,4 @@ GAS has a 6-minute execution limit. The tool mitigates this by:
 
 - Sending outreach messages (the tool only manages the number list)
 - Automatic weekly scheduling (PM triggers manually — keeps human review in the loop)
-- Phone number reachability validation
+- Phone number reachability validation (calling/pinging numbers)
