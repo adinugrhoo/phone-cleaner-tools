@@ -96,7 +96,7 @@ function initMasterSheet(urlOrId) {
       ['ID', 'Indonesia',   '+62', '9,10,11,12', 'TRUE',  ''],
       ['SG', 'Singapore',   '+65', '8',          'FALSE', '8,9'],
       ['MY', 'Malaysia',    '+60', '9,10',        'TRUE',  ''],
-      ['PH', 'Philippines', '+63', '10',          'TRUE',  '9'],
+      ['PH', 'Philippines', '+63', '10',          'TRUE',  ''],
       ['TH', 'Thailand',    '+66', '9',           'TRUE',  ''],
       ['VN', 'Vietnam',     '+84', '9,10',        'TRUE',  ''],
       ['AU', 'Australia',   '+61', '9,10',        'TRUE',  ''],
