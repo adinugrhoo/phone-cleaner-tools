@@ -88,20 +88,20 @@ function initMasterSheet(urlOrId) {
   let countries = ss.getSheetByName('Countries');
   if (!countries) {
     countries = ss.insertSheet('Countries');
-    countries.getRange(1, 1, 1, 5).setValues([[
-      'code', 'name', 'prefix', 'valid_lengths', 'strip_leading_zero'
+    countries.getRange(1, 1, 1, 6).setValues([[
+      'code', 'name', 'prefix', 'valid_lengths', 'strip_leading_zero', 'valid_leading_digits'
     ]]);
-    countries.getRange(1, 1, 1, 5).setFontWeight('bold');
+    countries.getRange(1, 1, 1, 6).setFontWeight('bold');
     const defaults = [
-      ['ID', 'Indonesia',   '+62', '9,10,11,12', 'TRUE'],
-      ['SG', 'Singapore',   '+65', '8',          'FALSE'],
-      ['MY', 'Malaysia',    '+60', '9,10',        'TRUE'],
-      ['PH', 'Philippines', '+63', '10',          'TRUE'],
-      ['TH', 'Thailand',    '+66', '9',           'TRUE'],
-      ['VN', 'Vietnam',     '+84', '9,10',        'TRUE'],
-      ['AU', 'Australia',   '+61', '9,10',        'TRUE'],
+      ['ID', 'Indonesia',   '+62', '9,10,11,12', 'TRUE',  ''],
+      ['SG', 'Singapore',   '+65', '8',          'FALSE', '8,9'],
+      ['MY', 'Malaysia',    '+60', '9,10',        'TRUE',  ''],
+      ['PH', 'Philippines', '+63', '10',          'TRUE',  '9'],
+      ['TH', 'Thailand',    '+66', '9',           'TRUE',  ''],
+      ['VN', 'Vietnam',     '+84', '9,10',        'TRUE',  ''],
+      ['AU', 'Australia',   '+61', '9,10',        'TRUE',  ''],
     ];
-    countries.getRange(2, 1, defaults.length, 5).setValues(defaults);
+    countries.getRange(2, 1, defaults.length, 6).setValues(defaults);
   }
 
   return 'Master sheet configured. Tabs: Master, Rejects, Countries are ready.';
@@ -130,8 +130,10 @@ function loadCountryRules() {
     const prefix           = String(row[2]).trim();
     const validLengths     = String(row[3]).trim().split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
     const stripLeadingZero = String(row[4]).trim().toUpperCase() === 'TRUE';
+    const leadingRaw       = String(row[5] || '').trim();
+    const validLeadingDigits = leadingRaw ? leadingRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
 
-    rules[code] = { code, name, prefix, validLengths, stripLeadingZero };
+    rules[code] = { code, name, prefix, validLengths, stripLeadingZero, validLeadingDigits };
     list.push({ code, name });
   }
 
@@ -152,9 +154,11 @@ function cleanNumber(raw, defaultCountryCode, rules) {
       const prefixDigits = rule.prefix.replace(/\D/g, '');
       if (digits.startsWith(prefixDigits)) {
         const local = digits.slice(prefixDigits.length);
-        if (rule.validLengths.includes(local.length)) {
-          return { valid: true, number: '+' + digits, country: code, region: rule.name };
+        if (!rule.validLengths.includes(local.length)) continue;
+        if (rule.validLeadingDigits.length > 0 && !rule.validLeadingDigits.includes(local[0])) {
+          return { valid: false, reason: 'invalid_leading_digit' };
         }
+        return { valid: true, number: '+' + digits, country: code, region: rule.name };
       }
     }
     // Has + but no country matched
@@ -167,9 +171,11 @@ function cleanNumber(raw, defaultCountryCode, rules) {
     const prefixDigits = rule.prefix.replace(/\D/g, '');
     if (digits.startsWith(prefixDigits) && !digits.startsWith('0')) {
       const local = digits.slice(prefixDigits.length);
-      if (rule.validLengths.includes(local.length)) {
-        return { valid: true, number: '+' + digits, country: code, region: rule.name };
+      if (!rule.validLengths.includes(local.length)) continue;
+      if (rule.validLeadingDigits.length > 0 && !rule.validLeadingDigits.includes(local[0])) {
+        return { valid: false, reason: 'invalid_leading_digit' };
       }
+      return { valid: true, number: '+' + digits, country: code, region: rule.name };
     }
   }
 
@@ -180,10 +186,13 @@ function cleanNumber(raw, defaultCountryCode, rules) {
     if (rule.stripLeadingZero && local.startsWith('0')) {
       local = local.slice(1);
     }
-    if (rule.validLengths.includes(local.length)) {
-      return { valid: true, number: rule.prefix + local, country: defaultCountryCode, region: rule.name };
+    if (!rule.validLengths.includes(local.length)) {
+      return { valid: false, reason: 'invalid_length' };
     }
-    return { valid: false, reason: 'invalid_length' };
+    if (rule.validLeadingDigits.length > 0 && !rule.validLeadingDigits.includes(local[0])) {
+      return { valid: false, reason: 'invalid_leading_digit' };
+    }
+    return { valid: true, number: rule.prefix + local, country: defaultCountryCode, region: rule.name };
   }
 
   return { valid: false, reason: 'ambiguous_country' };
