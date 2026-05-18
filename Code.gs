@@ -2,12 +2,16 @@
 // MENU — add-on entry points
 // ============================================================
 function onOpen(e) {
-  SpreadsheetApp.getUi()
-    .createAddonMenu()          // places it under Extensions > Phone Cleaner
-    .addItem('Open Sidebar', 'showSidebar')
-    .addSeparator()
-    .addItem('Configure Master Sheet', 'showConfigDialog')
-    .addToUi();
+  try {
+    SpreadsheetApp.getUi()
+      .createAddonMenu()
+      .addItem('Open Sidebar', 'showSidebar')
+      .addSeparator()
+      .addItem('Configure Master Sheet', 'showConfigDialog')
+      .addToUi();
+  } catch (err) {
+    // UI unavailable in trigger context — skip silently
+  }
 }
 
 // Called once when the add-on is first installed from the marketplace / manual install
