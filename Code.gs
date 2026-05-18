@@ -106,11 +106,31 @@ function initMasterSheet(urlOrId) {
       ['AU', 'Australia',   '+61', '9,10',        'TRUE',  ''],
     ];
     countries.getRange(2, 1, defaults.length, 6).setValues(defaults);
+  } else {
+    // Upgrade existing tab: add valid_leading_digits column if missing
+    const headers = countries.getRange(1, 1, 1, countries.getLastColumn()).getValues()[0];
+    if (!headers.includes('valid_leading_digits')) {
+      const newCol = countries.getLastColumn() + 1;
+      countries.getRange(1, newCol).setValue('valid_leading_digits').setFontWeight('bold');
 
-    // Column notes so users know what each field means
+      // Fill in SG = 8,9; leave all others blank
+      const data = countries.getRange(2, 1, countries.getLastRow() - 1, 1).getValues();
+      for (let i = 0; i < data.length; i++) {
+        if (String(data[i][0]).trim().toUpperCase() === 'SG') {
+          countries.getRange(i + 2, newCol).setValue('8,9');
+          break;
+        }
+      }
+    }
+  }
+
+  // Always ensure column notes are present (idempotent)
+  const leadingDigitsCol = countries.getRange(1, 1, 1, countries.getLastColumn())
+    .getValues()[0].indexOf('valid_leading_digits') + 1;
+  if (leadingDigitsCol > 0) {
     countries.getRange(1, 4).setNote('Comma-separated list of valid local number lengths (digits after country code).\nExample: "8" means exactly 8 digits. "9,10" means 9 or 10 digits.');
     countries.getRange(1, 5).setNote('TRUE = strip a leading 0 before matching length (e.g. 0812 → 812).\nFALSE = use number as-is after removing the country code.');
-    countries.getRange(1, 6).setNote(
+    countries.getRange(1, leadingDigitsCol).setNote(
       'Optional. Comma-separated digits that the local number must START with.\n\n' +
       'Leave BLANK → all leading digits accepted (no restriction).\n' +
       'Set a value → only those digits are valid; anything else is rejected.\n\n' +
